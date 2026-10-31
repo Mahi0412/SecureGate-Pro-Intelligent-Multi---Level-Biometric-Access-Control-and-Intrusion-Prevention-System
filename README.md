@@ -1,17 +1,17 @@
 # SecureGate-Pro-Intelligent-Multi---Level-Biometric-Access-Control-and-Intrusion-Prevention-System
 SecureGate Pro is an LPC2148-based embedded access-control system featuring three-level authentication using User ID, password and R305 fingerprint verification. It integrates EEPROM storage, UART communication, LCD feedback and L293D motor control for secure, automated door access.
 
-### Overview
+## Overview
 
 SecureGate Pro is an LPC2148 ARM7-based embedded access-control system developed using Embedded C. It provides three-level user authentication through User ID, password and fingerprint verification using the R305 fingerprint module. The system uses an AT24C256 EEPROM for user-related data storage, a 4×4 matrix keypad for input, a 16×2 LCD for status display and an L293D motor driver to control a DC motor for door operation.
 
 The project also demonstrates UART-based communication, I²C interfacing, external interrupt handling, biometric sensor integration, EEPROM operations and modular Embedded C programming.
 
-### Objective
+## Objective
 
 To design and implement an LPC2148-based intelligent access-control system that restricts unauthorized access through User ID, password and fingerprint authentication. The system grants access only after successful verification and controls a motor-driven door mechanism while reporting system and access events to a PC through UART0.
 
-### Features
+## Features
 
 - **Three-Level Authentication**: User ID, password and R305 fingerprint verification.
 
@@ -33,7 +33,7 @@ To design and implement an LPC2148-based intelligent access-control system that 
 
 - **External Interrupt**: Provides an interrupt-based request to enter the administrator menu.
 
-### Hardware Requirements
+## Hardware Requirements
 
 | S.No. | Hardware Component | Specification / Model | Purpose |
 |:---:|---|---|---|
@@ -51,7 +51,7 @@ To design and implement an LPC2148-based intelligent access-control system that 
 
 Check the voltage requirements of each module and use a common ground where required. The motor must be powered through the motor driver, not directly from an LPC2148 GPIO pin.
 
-### System Block Diagram
+## System Block Diagram
 
 The LPC2148 acts as the central controller and coordinates the keypad, LCD, EEPROM, fingerprint module and motor-control unit. UART0 is used for PC-side logging, while UART1 is used for communication with the R305 fingerprint module.
 <img width="1754" height="896" alt="image" src="https://github.com/user-attachments/assets/bcb42801-8854-4118-835c-41563e8c9417" />
@@ -116,7 +116,7 @@ The SecureGate Pro system follows a modular architecture in which the LPC2148 AR
 * **I²C:** Enables communication between the LPC2148 and AT24C256 EEPROM.
 
 
-### System Working
+## System Working
 
 ### 1. System Initialization
 
@@ -289,12 +289,11 @@ ADMINISTRATOR OPERATIONS:
                               Return to Admin Menu
 ```
 ### Communication Interfaces
-
 * **UART0:** PC communication and access-event logging.
 * **UART1:** R305 fingerprint module communication.
 * **I²C:** AT24C256 EEPROM communication.
   
-### Development Tools & Environment
+## Development Tools & Environment
 
 1.**Microcontroller**: LPC2148 ARM7
 
@@ -317,7 +316,7 @@ ADMINISTRATOR OPERATIONS:
 6. Integrate IoT connectivity for remote access monitoring and security alerts.
 7. Maintain timestamp-based access logs to track successful and failed authentication attempts for security auditing.
 
-### Applications
+## Applications
 
 1. **Smart Residential Security:** Provide biometric-based door access for apartments, independent houses and gated communities.
 2. **Bank Vault Security:** Protect cash vaults, lockers and areas containing valuable financial assets through multi-level authentication.
@@ -325,7 +324,12 @@ ADMINISTRATOR OPERATIONS:
 4. **Educational Institutions:** Secure examination rooms, laboratories, staff rooms and administrative departments from unauthorized access.
 5. **Warehouses and Inventory Storage:** Monitor and control access to storage facilities containing valuable goods, electronic components and sensitive materials.
 
-### Developed By
+## Limitations and Challenges
+1. **Hardware Dependency**: The system depends on the availability and proper functioning of the fingerprint sensor, EEPROM and other hardware components.
+2. **Power Dependency**: Continuous operation requires a stable power supply, and power interruptions may affect system availability.
+3. **Limited Remote Monitoring**: The current implementation supports PC-based UART logging but does not include IoT-based remote monitoring.
+
+## Developed By
 
 Tekula Srimahi
 
