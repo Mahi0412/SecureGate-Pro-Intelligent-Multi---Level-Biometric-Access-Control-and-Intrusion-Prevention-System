@@ -9,7 +9,7 @@
 *******************SYSTEM STARTED***********************
 *****************SYSTEM INITIALISED*********************
 ********************************************************
-Rusrcnt: 0*                     NO DATA BASE                     *
+Rusrcnt: 0*                NO DATA BASE                 *
 *****************ADMIN - LOGIN SUCCESSFUL****************
 ***********************FINGERPRINT**********************
 LOG: USER ID: 1111  FINGERPRINT ENROLLED
