@@ -122,82 +122,91 @@ The system waits for the configured switch input. When the close condition is de
 
 ## Project Workflow
 
-The following flowchart illustrates the complete operation of SecureGate Pro, including user authentication, fingerprint verification, administrator operations and automated door control.
+The following flowchart illustrates the overall working process of SecureGate Pro, including multi-level authentication, administrator operations and automated door control.
 
 ```mermaid
 flowchart TD
-    A([Power ON]) --> B[Initialize LPC2148 and Peripherals]
+    A([POWER ON]) --> B[Initialize LPC2148 Peripherals]
     B --> C[Initialize UART0, UART1, I2C, LCD and Keypad]
-    C --> D[Enable External Interrupt EINT2]
-    D --> E[Read Registered User Count from EEPROM]
+    C --> D[Enable EINT2 - P0.7]
+    D --> E[Read User Count from EEPROM]
 
-    E --> F{User Database Empty?}
+    E --> F{User Database Available?}
 
-    F -- Yes --> G[Display NO DATA BASE]
-    G --> H[Wait for Administrator Interrupt]
-    H --> I[Enter Administrator Menu]
+    F -- No --> G[Display NO DATA BASE]
+    G --> M[Administrator Menu]
 
-    F -- No --> J[Display Enter 4 Digit User ID]
-    J --> K[Enter User ID Through Keypad]
-    K --> L{User ID Valid?}
+    F -- Yes --> H[Enter User ID]
+    H --> I{User ID Valid?}
 
-    L -- No --> M[Display INVALID USER ID]
-    M --> N[Log ACCESS DENIED Through UART0]
-    N --> J
+    I -- No --> J[Display Invalid User ID]
+    J --> H
 
-    L -- Yes --> O[Read Stored Password from EEPROM]
-    O --> P[Enter 4 Digit Password]
-    P --> Q{Password Correct?}
+    I -- Yes --> K[Enter 4-Digit Password]
+    K --> L{Password Correct?}
 
-    Q -- No --> R[Display WRONG PASSWORD]
-    R --> S[Log Failed Attempt Through UART0]
-    S --> P
+    L -- No --> N[Display Wrong Password]
+    N --> K
 
-    Q -- Yes --> T[Start R305 Fingerprint Verification]
-    T --> U[Communicate Through UART1]
-    U --> V{Fingerprint Verified?}
+    L -- Yes --> O[Fingerprint Verification - R305]
+    O --> P{Fingerprint Matched?}
 
-    V -- No --> W[Access Not Granted]
-    W --> J
+    P -- No --> Q[Access Denied]
+    Q --> H
 
-    V -- Yes --> X[Log ACCESS GRANTED Through UART0]
-    X --> Y[Display DOOR OPEN]
-    Y --> Z[Activate L293D Motor Driver]
-    Z --> AA[Open Door Using DC Motor]
-    AA --> AB[Wait for Door Close Switch Input]
-    AB --> AC[Activate Motor in Closing Direction]
-    AC --> AD[Close Door]
-    AD --> AE[Log DOOR CLOSED Through UART0]
-    AE --> J
+    P -- Yes --> R[ACCESS GRANTED]
+    R --> S[Open Door Using L293D]
+    S --> T[Door Closing Operation]
+    T --> U[Display DOOR CLOSED]
+    U --> H
 
-    I --> AF{Select Admin Operation}
-    AF -- Edit Password --> AG[Verify Current Password]
-    AG --> AH[Enter and Confirm New Password]
-    AH --> AI[Update Password in EEPROM]
-    AI --> I
+    D -. Admin Request .-> M
+    M --> V{Select Operation}
 
-    AF -- Fingerprint Management --> AJ[Select Fingerprint Operation]
-    AJ --> AK{Select Operation}
-    AK -- Enroll --> AL[Enroll Fingerprint Using R305]
-    AK -- Search --> AM[Search Fingerprint]
-    AK -- Delete --> AN[Delete Selected Fingerprint]
-    AK -- Delete All --> AO[Delete All Fingerprints]
+    V -- Edit Password --> W[Update Password in EEPROM]
+    W --> M
 
-    AL --> I
-    AM --> I
-    AN --> I
-    AO --> I
+    V -- Fingerprint Management --> X[Enroll / Search / Delete Fingerprint]
+    X --> M
 
-    AF -- Exit --> AP([Return to Main Access Loop])
+    V -- Exit --> H
 
-    classDef startEnd fill:#d5f5e3,stroke:#229954,color:#145a32,stroke-width:2px;
-    classDef process fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:1.5px;
-    classDef decision fill:#fff3cd,stroke:#d39e00,color:#664d03,stroke-width:1.5px;
-    classDef error fill:#fce4e4,stroke:#dc3545,color:#842029,stroke-width:1.5px;
+    classDef start fill:#d5f5e3,stroke:#229954,color:#145a32,stroke-width:2px;
+    classDef process fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef decision fill:#fff3cd,stroke:#d39e00,color:#664d03;
+    classDef success fill:#d1fae5,stroke:#059669,color:#065f46;
+    classDef error fill:#fee2e2,stroke:#dc2626,color:#991b1b;
 
-    class A,AP startEnd;
-    class B,C,D,E,G,H,I,J,K,O,P,T,U,X,Y,Z,AA,AB,AC,AD,AE,AG,AH,AI,AJ,AL,AM,AN,AO process;
-    class F,L,Q,V,AF,AK decision;
-    class M,N,R,S,W error;
+    class A start;
+    class B,C,D,E,G,H,K,O,M,S,T,U,W,X process;
+    class F,I,L,P,V decision;
+    class R success;
+    class J,N,Q error;
+```
+
+### Communication Interfaces
+
+* **UART0:** PC communication and access-event logging.
+* **UART1:** R305 fingerprint module communication.
+* **I²C:** AT24C256 EEPROM communication.
+
+## Future Enhancements
+1. Implement fingerprint liveness detection to prevent fake fingerprint access.
+2. Integrate RFID cards for additional authentication.
+3. Introduce a duress password for emergency access alerts.
+4. Restrict user access based on predefined time schedules.
+5. Enable automatic door locking after a predefined timeout.
+6. Integrate IoT connectivity for remote access monitoring and security alerts.
+7. Maintain timestamp-based access logs to track successful and failed authentication attempts for security auditing.
+
+### Applications
+
+1. **Smart Residential Security:** Provide biometric-based door access for apartments, independent houses and gated communities.
+2. **Bank Vault Security:** Protect cash vaults, lockers and areas containing valuable financial assets through multi-level authentication.
+3. **Hospitals and Healthcare Facilities:** Restrict access to medicine storage rooms, pharmacies and confidential patient-record sections.
+4. **Educational Institutions:** Secure examination rooms, laboratories, staff rooms and administrative departments from unauthorized access.
+5. **Warehouses and Inventory Storage:** Monitor and control access to storage facilities containing valuable goods, electronic components and sensitive materials.
+
+
 
 
