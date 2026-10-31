@@ -54,6 +54,7 @@ Check the voltage requirements of each module and use a common ground where requ
 ### System Block Diagram
 
 The LPC2148 acts as the central controller and coordinates the keypad, LCD, EEPROM, fingerprint module and motor-control unit. UART0 is used for PC-side logging, while UART1 is used for communication with the R305 fingerprint module.
+<img width="1754" height="896" alt="image" src="https://github.com/user-attachments/assets/bcb42801-8854-4118-835c-41563e8c9417" />
 
 ## Pin Configuration
 
@@ -77,6 +78,43 @@ The LPC2148 acts as the central controller and coordinates the keypad, LCD, EEPR
 | 14 | L293D | 1,2EN | P1.28 | Motor driver enable |
 | 15 | Door Control | Switch Input | P0.5 | Door closing switch |
 | 16 | External Interrupt | EINT2 | P0.7 | Administrator menu request |
+
+## System Architecture
+
+The SecureGate Pro system follows a modular architecture in which the LPC2148 ARM7 microcontroller acts as the central controller, coordinating authentication, data storage, user input, communication and door control.
+
+### 1. Processing Unit
+
+* **LPC2148 ARM7 Microcontroller:** Acts as the central controller and manages the authentication sequence, peripheral communication, administrator operations and door control.
+
+### 2. Input Unit
+
+* **4×4 Matrix Keypad:** Accepts user IDs, passwords and administrator commands.
+* **External Interrupt (EINT2 – P0.7):** Provides access to the administrator menu.
+
+### 3. Authentication Unit
+
+* **R305 Fingerprint Sensor:** Performs fingerprint enrollment and verification through UART1 communication.
+
+### 4. Memory Unit
+
+* **AT24C256 EEPROM:** Stores registered user information and password data through the I²C communication interface.
+
+### 5. Display Unit
+
+* **16×2 LCD:** Displays authentication prompts, system messages, access status and door operation updates.
+
+### 6. Door Control Unit
+
+* **L293D Motor Driver:** Controls the DC motor according to authentication results and door operation commands.
+* **DC Motor:** Performs the door opening and closing operations.
+
+### 7. Communication and Logging Unit
+
+* **UART0:** Establishes serial communication with a PC for system monitoring and access-event logging.
+* **UART1:** Handles communication between the LPC2148 and R305 fingerprint sensor.
+* **I²C:** Enables communication between the LPC2148 and AT24C256 EEPROM.
+
 
 ### System Working
 
@@ -123,72 +161,152 @@ The system waits for the configured switch input. When the close condition is de
 ## Project Workflow
 
 The following flowchart illustrates the overall working process of SecureGate Pro, including multi-level authentication, administrator operations and automated door control.
+```                  +------------------+
+                  |     POWER ON     |
+                  +--------+---------+
+                           |
+                           v
+              +--------------------------+
+              | Initialize LPC2148 and   |
+              | Required Peripherals     |
+              +------------+-------------+
+                           |
+                           v
+              +--------------------------+
+              | Read User Count from     |
+              | AT24C256 EEPROM          |
+              +------------+-------------+
+                           |
+                           v
+                  +------------------+
+                  | User Database    |
+                  | Available?       |
+                  +----+---------+---+
+                       |         |
+                  NO   |         | YES
+                       |         |
+                       v         v
+             +----------------+  +------------------+
+             | Display NO     |  | Enter 4-Digit    |
+             | DATA BASE      |  | User ID          |
+             +-------+--------+  +--------+---------+
+                     |                    |
+                     |                    v
+                     |           +------------------+
+                     |           | Verify User ID   |
+                     |           +--------+---------+
+                     |                    |
+                     |                    v
+                     |           +------------------+
+                     |           | User ID Valid?   |
+                     |           +----+---------+---+
+                     |                |         |
+                     |           NO   |         | YES
+                     |                |         |
+                     |                v         v
+                     |       +-------------+  +------------------+
+                     |       | Access       |  | Enter 4-Digit    |
+                     |       | Denied       |  | Password         |
+                     |       +------+------+  +--------+---------+
+                     |              |                  |
+                     |              |                  v
+                     |              |         +------------------+
+                     |              |         | Verify Password  |
+                     |              |         +--------+---------+
+                     |              |                  |
+                     |              |                  v
+                     |              |         +------------------+
+                     |              |         | Password Correct?|
+                     |              |         +----+---------+---+
+                     |              |              |         |
+                     |              |         NO   |         | YES
+                     |              |              |         |
+                     |              |              v         v
+                     |              |      +-------------+  +------------------+
+                     |              |      | Wrong       |  | Fingerprint      |
+                     |              |      | Password    |  | Verification     |
+                     |              |      +------+------+  | Using R305       |
+                     |              |             |         +--------+---------+
+                     |              |             |                  |
+                     |              |             |                  v
+                     |              |             |         +------------------+
+                     |              |             |         | Fingerprint     |
+                     |              |             |         | Matched?         |
+                     |              |             |         +----+---------+---+
+                     |              |             |              |         |
+                     |              |             |         NO   |         | YES
+                     |              |             |              |         |
+                     |              |             |              v         v
+                     |              |             |       +----------+  +----------------+
+                     |              |             |       | Access   |  | ACCESS GRANTED |
+                     |              |             |       | Denied   |  +-------+--------+
+                     |              |             |       +----+-----+          |
+                     |              |             |            |                v
+                     |              |             |            |       +----------------+
+                     |              |             |            |       | OPEN DOOR      |
+                     |              |             |            |       | L293D + DC     |
+                     |              |             |            |       | MOTOR          |
+                     |              |             |            |       +-------+--------+
+                     |              |             |            |               |
+                     |              |             |            |               v
+                     |              |             |            |       +----------------+
+                     |              |             |            |       | DOOR CLOSING   |
+                     |              |             |            |       | OPERATION      |
+                     |              |             |            |       +-------+--------+
+                     |              |             |            |               |
+                     +--------------+-------------+------------+---------------+
+                                                    |
+                                                    v
+                                      +--------------------------+
+                                      | Return to Main Access    |
+                                      | Control Loop             |
+                                      +--------------------------+
 
-```mermaid
-flowchart TD
-    A([POWER ON]) --> B[Initialize LPC2148 Peripherals]
-    B --> C[Initialize UART0, UART1, I2C, LCD and Keypad]
-    C --> D[Enable EINT2 - P0.7]
-    D --> E[Read User Count from EEPROM]
 
-    E --> F{User Database Available?}
+ADMINISTRATOR OPERATIONS:
 
-    F -- No --> G[Display NO DATA BASE]
-    G --> M[Administrator Menu]
-
-    F -- Yes --> H[Enter User ID]
-    H --> I{User ID Valid?}
-
-    I -- No --> J[Display Invalid User ID]
-    J --> H
-
-    I -- Yes --> K[Enter 4-Digit Password]
-    K --> L{Password Correct?}
-
-    L -- No --> N[Display Wrong Password]
-    N --> K
-
-    L -- Yes --> O[Fingerprint Verification - R305]
-    O --> P{Fingerprint Matched?}
-
-    P -- No --> Q[Access Denied]
-    Q --> H
-
-    P -- Yes --> R[ACCESS GRANTED]
-    R --> S[Open Door Using L293D]
-    S --> T[Door Closing Operation]
-    T --> U[Display DOOR CLOSED]
-    U --> H
-
-    D -. Admin Request .-> M
-    M --> V{Select Operation}
-
-    V -- Edit Password --> W[Update Password in EEPROM]
-    W --> M
-
-    V -- Fingerprint Management --> X[Enroll / Search / Delete Fingerprint]
-    X --> M
-
-    V -- Exit --> H
-
-    classDef start fill:#d5f5e3,stroke:#229954,color:#145a32,stroke-width:2px;
-    classDef process fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
-    classDef decision fill:#fff3cd,stroke:#d39e00,color:#664d03;
-    classDef success fill:#d1fae5,stroke:#059669,color:#065f46;
-    classDef error fill:#fee2e2,stroke:#dc2626,color:#991b1b;
-
-    class A start;
-    class B,C,D,E,G,H,K,O,M,S,T,U,W,X process;
-    class F,I,L,P,V decision;
-    class R success;
-    class J,N,Q error;
+       External Interrupt (EINT2 - P0.7)
+                       |
+                       v
+              +--------------------+
+              | Administrator Menu |
+              +---------+----------+
+                        |
+                        v
+              +--------------------+
+              | Select Operation   |
+              +----+----------+----+
+                   |          |
+          Edit Password      Fingerprint Management
+                   |          |
+                   v          v
+          Update Password   +----------------------+
+          in EEPROM         | Enroll / Search /    |
+                            | Delete / Delete All   |
+                            +----------+-----------+
+                                       |
+                                       v
+                              Return to Admin Menu
 ```
-
 ### Communication Interfaces
 
 * **UART0:** PC communication and access-event logging.
 * **UART1:** R305 fingerprint module communication.
 * **I²C:** AT24C256 EEPROM communication.
+  
+### Development Tools & Environment
+
+1.**Microcontroller**: LPC2148 ARM7
+
+2.**Programming Language**: Embedded C
+
+3.**IDE**: Keil µVision
+
+4.**Programming Tool**: Flash Magic
+
+5.**Communication Interfaces**: UART0, UART1 and I²C
+
+6.**Core Concepts**:GPIO, EEPROM interfacing, external interrupts, keypad, LCD interfacing, fingerprint sensor communication and motor control.
 
 ## Future Enhancements
 1. Implement fingerprint liveness detection to prevent fake fingerprint access.
@@ -207,6 +325,11 @@ flowchart TD
 4. **Educational Institutions:** Secure examination rooms, laboratories, staff rooms and administrative departments from unauthorized access.
 5. **Warehouses and Inventory Storage:** Monitor and control access to storage facilities containing valuable goods, electronic components and sensitive materials.
 
+### Developed By
+
+Tekula Srimahi
+
+**Project**: SecureGate Pro – Intelligent Multi-Level Biometric Access Control and Intrusion Prevention System
 
 
 
