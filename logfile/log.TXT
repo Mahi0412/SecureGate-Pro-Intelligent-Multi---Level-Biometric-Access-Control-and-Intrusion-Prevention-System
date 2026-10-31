@@ -1,0 +1,28 @@
+********************************************************
+*                     WELCOME TO                       *
+*             SECUREGATE PRO - INTELLIGENT             *
+*                MULTI-LEVEL BIOMETRIC                 *
+*                 ACCESS CONTROL AND                   *
+*                INTRUSION PREVENTION                  *
+*                      SYSTEM                          *
+********************************************************
+*******************SYSTEM STARTED***********************
+*****************SYSTEM INITIALISED*********************
+********************************************************
+Rusrcnt: 0*                     NO DATA BASE                     *
+*****************ADMIN - LOGIN SUCCESSFUL****************
+***********************FINGERPRINT**********************
+LOG: USER ID: 1111  FINGERPRINT ENROLLED
+1
+Rusrcnt: 1
+LOG001:USER 1111-USER ID VERIFIED
+LOG002:USER 1111 -PASSWORD VERIFIED
+LOG003:USER 1111-FINGERPRINT VERIFIED
+LOG004:USER 1111-ACCESS GRANTED
+LOG005:USER 1111-DOOR OPENED
+LOG006:USER 1111-PRESS SW TO CLOSE
+LOG007:USER 1111-DOOR CLOSED
+LOG008:USER 1111-USER ID VERIFIED
+LOG009:USER 1111-WRONG PASSWORD 
+LOG010:USER 1111-WRONG PASSWORD 
+LOG011:USER 1111-PASSWORD VERIFIED
