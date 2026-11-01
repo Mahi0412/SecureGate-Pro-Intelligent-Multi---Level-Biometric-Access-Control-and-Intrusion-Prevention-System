@@ -54,6 +54,7 @@ Check the voltage requirements of each module and use a common ground where requ
 ## System Block Diagram
 
 The LPC2148 acts as the central controller and coordinates the keypad, LCD, EEPROM, fingerprint module and motor-control unit. UART0 is used for PC-side logging, while UART1 is used for communication with the R305 fingerprint module.
+
 <img width="1754" height="896" alt="image" src="https://github.com/user-attachments/assets/bcb42801-8854-4118-835c-41563e8c9417" />
 
 ## Pin Configuration
